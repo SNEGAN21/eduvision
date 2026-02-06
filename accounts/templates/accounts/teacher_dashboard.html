@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}Teacher Dashboard{% endblock %}
+{% block content %}
+
+<div class="container mt-4">
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold">👨‍🏫 Teacher Dashboard</h2>
+    <span class="text-muted">Manage classes, track students, and view reports</span>
+  </div>
+
+  <!-- Metrics Row -->
+  <div class="row text-center mb-4 g-3">
+    <div class="col-md-3">
+      <div class="card shadow-sm border-0 p-3 h-100">
+        <h6 class="text-muted">📅 Total Sessions</h6>
+        <p class="fs-3 fw-bold text-primary">{{ total_sessions }}</p>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card shadow-sm border-0 p-3 h-100">
+        <h6 class="text-muted">🎓 Total Students</h6>
+        <p class="fs-3 fw-bold text-success">{{ total_students }}</p>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card shadow-sm border-0 p-3 h-100">
+        <h6 class="text-muted">📊 Avg Engagement</h6>
+        <p class="fs-3 fw-bold text-info">{{ avg_engagement }}%</p>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card shadow-sm border-0 p-3 h-100">
+        <h6 class="text-muted">📑 Reports Generated</h6>
+        <p class="fs-3 fw-bold text-warning">{{ total_reports }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="d-flex gap-3 mb-5">
+    <a href="{% url 'classrooms:create_session' %}" class="btn btn-primary fw-bold">➕ Create Session</a>
+    <a href="{% url 'classrooms:class_list' %}" class="btn btn-outline-dark fw-bold">📚 View Sessions</a>
+    <a href="{% url 'engagement:report_list' %}" class="btn btn-outline-success fw-bold">📑 View Reports</a>
+  </div>
+
+  <!-- Recent Sessions -->
+  <div class="card shadow-sm border-0 mb-5">
+    <div class="card-header bg-dark text-white">
+      <h5 class="mb-0">🕑 Recent Sessions</h5>
+    </div>
+    <div class="card-body p-0">
+      <table class="table table-hover mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Title</th>
+            <th>Subject</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in sessions %}
+          <tr>
+            <td class="fw-bold">{{ s.title }}</td>
+            <td>{{ s.subject }}</td>
+            <td>{{ s.date }}</td>
+            <td>{{ s.start_time }} - {{ s.end_time }}</td>
+            <td class="text-center">
+              <a href="{% url 'classrooms:class_detail' s.id %}" class="btn btn-sm btn-outline-primary">🔍 Details</a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5" class="text-center text-muted py-3">No recent sessions.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Analytics -->
+  <h4 class="fw-bold mb-3">📈 Analytics</h4>
+  <div class="row g-3">
+    <div class="col-md-6">
+      <div class="card shadow-sm border-0 p-3">
+        <h6 class="text-center">📊 Engagement Trend (Last Sessions)</h6>
+        <canvas id="engagementChart"></canvas>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card shadow-sm border-0 p-3">
+        <h6 class="text-center">👥 Student Count per Session</h6>
+        <canvas id="studentChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const chartData = {{ chart_data|safe }};
+  const labels = chartData.map(d => d.title);
+
+  // Engagement trend
+  new Chart(document.getElementById('engagementChart'), {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Avg Engagement %',
+        data: chartData.map(d => d.engagement),
+        borderColor: '#0d6efd',
+        backgroundColor: 'rgba(13, 110, 253, 0.2)',
+        fill: true,
+        tension: 0.3
+      }]
+    }
+  });
+
+  // Student count per session
+  new Chart(document.getElementById('studentChart'), {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Students',
+        data: chartData.map(d => d.students),
+        backgroundColor: '#198754'
+      }]
+    }
+  });
+</script>
+
+{% endblock %}

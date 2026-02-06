@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Student Dashboard{% endblock %}
+{% block content %}
+
+<div class="container mt-4">
+  <!-- Greeting -->
+  <div class="mb-4">
+    <h2 class="fw-bold">👋 Welcome, <span class="text-primary">{{ user.username }}</span></h2>
+    <p class="text-muted">Here’s your upcoming schedule and engagement progress.</p>
+  </div>
+
+  <!-- Upcoming Classes -->
+  <div class="card shadow-sm mb-5 border-0">
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0">📅 Upcoming Classes</h5>
+    </div>
+    <div class="card-body p-0">
+      <table class="table table-hover mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Title</th>
+            <th>Subject</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th class="text-center">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in upcoming_classes %}
+          <tr>
+            <td class="fw-bold">{{ c.title }}</td>
+            <td>{{ c.subject }}</td>
+            <td>{{ c.date }}</td>
+            <td>{{ c.start_time }} - {{ c.end_time }}</td>
+            <td class="text-center">
+              <a href="{% url 'engagement:record' c.id %}" class="btn btn-sm btn-outline-primary">
+                🎥 Join & Record
+              </a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5" class="text-center text-muted py-3">No upcoming classes scheduled.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Engagement Reports -->
+  <div class="card shadow-sm border-0">
+    <div class="card-header bg-success text-white">
+      <h5 class="mb-0">📊 My Engagement Reports</h5>
+    </div>
+    <div class="card-body p-0">
+      <table class="table table-hover mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Class</th>
+            <th>Date</th>
+            <th>Avg Engagement</th>
+            <th class="text-center">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in reports %}
+          <tr>
+            <td class="fw-bold">{{ r.session.title }}</td>
+            <td>{{ r.session.date }}</td>
+            <td>
+              <span class="badge bg-info text-dark">{{ r.avg_engagement }}%</span>
+            </td>
+            <td class="text-center">
+              <a href="{% url 'engagement:student_report' r.id %}" class="btn btn-sm btn-outline-secondary">📄 View</a>
+              <a href="{% url 'classrooms:download_student_report' r.session.id r.student.id %}" class="btn btn-sm btn-outline-success">⬇ Download</a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="4" class="text-center text-muted py-3">No reports available yet.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

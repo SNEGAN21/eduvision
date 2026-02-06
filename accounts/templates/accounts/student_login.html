@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Student Login{% endblock %}
+{% block content %}
+
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-5 col-lg-4">
+
+      <!-- Card -->
+      <div class="card shadow-lg border-0 rounded-3">
+        <div class="card-body p-4">
+          <!-- Header -->
+          <div class="text-center mb-4">
+            <div class="fs-1">🎓</div>
+            <h3 class="fw-bold">Student Login</h3>
+            <p class="text-muted small">Access your classes and engagement reports</p>
+          </div>
+
+          <!-- Error Messages -->
+          {% for msg in messages %}
+            <div class="alert alert-danger small py-2">{{ msg }}</div>
+          {% endfor %}
+
+          <!-- Login Form -->
+          <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label class="form-label">👤 Username</label>
+              <input type="text" name="username" class="form-control" placeholder="Enter your username" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">🔑 Password</label>
+              <input type="password" name="password" class="form-control" placeholder="Enter your password" required>
+            </div>
+            <button type="submit" class="btn btn-success w-100 fw-bold">Login</button>
+          </form>
+
+          <!-- Footer Links -->
+          <div class="text-center mt-3 small">
+            <span class="text-muted">New student?</span>
+            <a href="{% url 'accounts:student_signup' %}" class="fw-bold">Create Account</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}
