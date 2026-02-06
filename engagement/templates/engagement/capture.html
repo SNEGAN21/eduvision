@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}Join Class - {{ session.title }}{% endblock %}
+{% block content %}
+
+<div class="container mt-5 text-center">
+  <!-- Header -->
+  <h2 class="fw-bold">{{ session.title }} <small class="text-muted">({{ session.subject }})</small></h2>
+  <p class="text-secondary">🎥 Engagement recording in progress. Keep your camera on and look straight ahead.</p>
+
+  <!-- Webcam Preview -->
+  <div class="d-flex justify-content-center mt-4">
+    <video id="video" autoplay playsinline width="480" 
+           class="border border-3 rounded-3 shadow-sm bg-dark"></video>
+  </div>
+
+  <!-- Live HUD -->
+  <div class="card mt-4 shadow-sm border-0">
+    <div class="card-header bg-dark text-white fw-bold">📊 Live Engagement Monitor</div>
+    <div class="card-body small text-start">
+      <p class="mb-2"><strong>Status:</strong> <span id="status" class="text-muted">Initializing...</span></p>
+      <div class="row">
+        <div class="col-md-6">
+          <p class="mb-2"><strong>Emotion:</strong> <span id="hud-emotion">-</span></p>
+          <p class="mb-2"><strong>Blink (EAR):</strong> <span id="hud-ear">-</span></p>
+        </div>
+        <div class="col-md-6">
+          <p class="mb-2"><strong>Gaze:</strong> <span id="hud-gaze">-</span></p>
+          <p class="mb-2"><strong>Engagement Score:</strong> <span id="hud-score" class="fw-bold text-primary">-</span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Finish Button -->
+  <div class="mt-4">
+    <button id="finishBtn" class="btn btn-lg btn-success px-5 fw-bold shadow">
+      ✅ Finish & Save Report
+    </button>
+  </div>
+</div>
+
+<script>
+  const video = document.getElementById("video");
+  const statusEl = document.getElementById("status");
+  const hudEmotion = document.getElementById("hud-emotion");
+  const hudEar = document.getElementById("hud-ear");
+  const hudGaze = document.getElementById("hud-gaze");
+  const hudScore = document.getElementById("hud-score");
+
+  // Start webcam
+  navigator.mediaDevices.getUserMedia({ video: true })
+    .then(stream => { video.srcObject = stream; })
+    .catch(() => { statusEl.innerText = "⚠️ Cannot access webcam"; });
+
+  // Send frames every 1s
+  function captureFrame() {
+    if (video.videoWidth === 0) return; // not ready
+
+    // Resize for CNN (224x224)
+    const canvas = document.createElement("canvas");
+    canvas.width = 224;
+    canvas.height = 224;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(video, 0, 0, 224, 224);
+
+    // Compress + send
+    canvas.toBlob(blob => {
+      const formData = new FormData();
+      formData.append("frame", blob, "frame.jpg");
+
+      fetch("{% url 'engagement:ingest' session.id %}", {
+        method: "POST",
+        headers: { "X-CSRFToken": "{{ csrf_token }}" },
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.score !== undefined) {
+          statusEl.innerText = "✅ Frame sent";
+          hudEmotion.innerText = `${data.emotion} (${(data.emotion_prob*100).toFixed(0)}%)`;
+          hudEar.innerText = data.ear || "-";
+          hudGaze.innerText = (data.gaze ? Math.round(data.gaze*100) : 0) + "%";
+          hudScore.innerText = data.score;
+        } else {
+          statusEl.innerText = "⚠️ Face not detected";
+        }
+      })
+      .catch(() => { statusEl.innerText = "❌ Error sending frame"; });
+    }, "image/jpeg", 0.4);
+  }
+
+  setInterval(captureFrame, 1000);
+
+  // Finish
+  document.getElementById("finishBtn").onclick = () => {
+    window.location.href = "{% url 'engagement:finish' session.id %}";
+  };
+</script>
+
+{% endblock %}

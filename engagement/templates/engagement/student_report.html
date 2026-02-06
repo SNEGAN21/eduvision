@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}Engagement Report - {{ session.title }}{% endblock %}
+{% block content %}
+
+<div class="container mt-5">
+  <!-- Header -->
+  <div class="text-center mb-4">
+    <h2 class="fw-bold">📑 Engagement Report</h2>
+    <h5 class="text-muted">{{ session.title }} ({{ session.subject }})</h5>
+    <p class="small text-secondary">
+      {{ session.date }} | {{ session.start_time }} – {{ session.end_time }}
+    </p>
+  </div>
+
+  <!-- Summary Metrics -->
+  <div class="row text-center g-3 mb-4">
+    <div class="col-md-3">
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <h6 class="text-muted">⏳ Duration</h6>
+          <p class="fs-4 fw-bold">{{ duration }} min</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <h6 class="text-muted">📊 Engagement</h6>
+          <p class="fs-4 fw-bold text-success">{{ engagement }}%</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <h6 class="text-muted">👀 Attention</h6>
+          <p class="fs-4 fw-bold text-primary">{{ attention }}%</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <h6 class="text-muted">😊 Mood</h6>
+          <p class="fs-4 fw-bold text-warning">{{ mood }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Engagement Progress -->
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+      <h5 class="fw-bold mb-3">📈 Overall Engagement</h5>
+      <div class="progress" style="height: 28px;">
+        <div class="progress-bar bg-info fw-bold" role="progressbar"
+             style="width: {{ engagement }}%;"
+             aria-valuenow="{{ engagement }}" aria-valuemin="0" aria-valuemax="100">
+          {{ engagement }}%
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Row -->
+  <div class="row g-3">
+    <div class="col-md-6">
+      <div class="card shadow-sm border-0 p-3">
+        <h6 class="fw-bold text-center">👀 Attention Distribution</h6>
+        <canvas id="attentionChart" height="250"></canvas>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card shadow-sm border-0 p-3">
+        <h6 class="fw-bold text-center">😃 Emotional Breakdown</h6>
+        <canvas id="emotionChart" height="250"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  // Attention Chart (Doughnut)
+  new Chart(document.getElementById('attentionChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Focused', 'Distracted'],
+      datasets: [{
+        data: [{{ attention }}, {{ distracted }}],
+        backgroundColor: ['#28a745', '#dee2e6'],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      plugins: { legend: { position: 'bottom' } }
+    }
+  });
+
+  // Emotion Chart (Pie)
+  new Chart(document.getElementById('emotionChart'), {
+    type: 'pie',
+    data: {
+      labels: ['Neutral', 'Happy', 'Surprised', 'Sad', 'Angry'],
+      datasets: [{
+        data: [
+          {{ emotions.neutral|default:0 }},
+          {{ emotions.happy|default:0 }},
+          {{ emotions.surprise|default:0 }},
+          {{ emotions.sad|default:0 }},
+          {{ emotions.angry|default:0 }}
+        ],
+        backgroundColor: [
+          '#6c757d', // Neutral
+          '#28a745', // Happy
+          '#ffc107', // Surprise
+          '#0d6efd', // Sad
+          '#dc3545'  // Angry
+        ],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      plugins: { legend: { position: 'bottom' } }
+    }
+  });
+</script>
+
+{% endblock %}

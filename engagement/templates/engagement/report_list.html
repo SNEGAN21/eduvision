@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Engagement Reports{% endblock %}
+{% block content %}
+<h2 class="mb-4">Engagement Reports</h2>
+<table class="table table-hover shadow-sm">
+  <thead>
+    <tr>
+      <th>Student</th>
+      <th>Session</th>
+      <th>Average Engagement</th>
+      <th>Max Engagement</th>
+      <th>Low Attention %</th>
+      <th>Created At</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for report in reports %}
+    <tr>
+      <td>{{ report.student.username }}</td>
+      <td>{{ report.session.title }}</td>
+      <td>{{ report.avg_engagement }}%</td>
+      <td>{{ report.max_engagement }}%</td>
+      <td>{{ report.low_attention_pct }}%</td>
+      <td>{{ report.created_at }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="6" class="text-center">No reports available</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
