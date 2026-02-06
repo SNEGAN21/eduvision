@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}Class Detail{% endblock %}
+{% block content %}
+
+<div class="container mt-4">
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h2 class="fw-bold">{{ session.title }}</h2>
+      <p class="text-muted mb-0">
+        📘 {{ session.subject }} &nbsp; | &nbsp; 
+        <strong>Date:</strong> {{ session.date }} &nbsp; | &nbsp; 
+        <strong>Time:</strong> {{ session.start_time }} - {{ session.end_time }}
+      </p>
+    </div>
+  </div>
+
+  <!-- Metrics Row -->
+  <div class="row text-center mb-4 g-3">
+    <div class="col-md-3">
+      <div class="card shadow-sm border-0 p-3">
+        <h6 class="text-muted">👥 Total Students</h6>
+        <p class="fs-3 fw-bold">{{ total_students }}</p>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card shadow-sm border-0 p-3">
+        <h6 class="text-muted">✅ Attended</h6>
+        <p class="fs-3 fw-bold text-success">{{ attended }}</p>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card shadow-sm border-0 p-3">
+        <h6 class="text-muted">❌ Absent</h6>
+        <p class="fs-3 fw-bold text-danger">{{ absent }}</p>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card shadow-sm border-0 p-3">
+        <h6 class="text-muted">📊 Avg Engagement</h6>
+        <p class="fs-3 fw-bold text-primary">{{ avg_engagement }}%</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Student List -->
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-dark text-white">
+      <h5 class="mb-0">🎓 Students</h5>
+    </div>
+    <div class="card-body p-0">
+      <table class="table table-hover mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Name</th>
+            <th>Department</th>
+            <th>Year</th>
+            <th>Status</th>
+            <th>Engagement</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in student_data %}
+          <tr>
+            <td class="fw-bold">{{ item.student.user.username }}</td>
+            <td>{{ item.student.department }}</td>
+            <td>{{ item.student.year }}</td>
+            <td>
+              {% if item.report %}
+                <span class="badge bg-success">Attended</span>
+              {% else %}
+                <span class="badge bg-danger">Absent</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if item.report %}
+                <span class="fw-bold">{{ item.report.avg_engagement }}%</span>
+              {% else %}
+                <span class="text-muted">-</span>
+              {% endif %}
+            </td>
+            <td class="text-center">
+              {% if item.report %}
+                <a href="{% url 'engagement:teacher_student_report' session.id item.student.id %}" 
+                   class="btn btn-sm btn-outline-info">📑 View Report</a>
+                <a href="{% url 'classrooms:download_student_report' session.id item.student.id %}" 
+                   class="btn btn-sm btn-outline-success">⬇️ PDF</a>
+              {% else %}
+                <span class="text-muted">No Report</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div class="d-flex gap-2 mt-3 flex-wrap">
+    <a href="{% url 'classrooms:class_list' %}" class="btn btn-outline-secondary">⬅ Back</a>
+    <a href="{% url 'classrooms:delete_session' session.id %}" class="btn btn-outline-danger">🗑 Delete Session</a>
+    <a href="{% url 'classrooms:download_class_report' session.id %}" class="btn btn-primary">📄 Download Class Report</a>
+    <a href="{% url 'classrooms:download_all_reports' session.id %}" class="btn btn-success">📦 Download All Reports (ZIP)</a>
+  </div>
+</div>
+
+{% endblock %}

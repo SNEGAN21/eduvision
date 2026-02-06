@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Delete Session{% endblock %}
+{% block content %}
+
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <!-- Warning Card -->
+      <div class="card shadow-lg border-0">
+        <div class="card-header bg-danger text-white">
+          <h4 class="mb-0">⚠ Confirm Delete</h4>
+        </div>
+        <div class="card-body p-4">
+          <p class="fs-5">
+            Are you sure you want to <span class="fw-bold text-danger">permanently delete</span> 
+            the session <strong>{{ session.title }}</strong> ({{ session.subject }})?
+          </p>
+          <p class="text-muted small">This action cannot be undone.</p>
+
+          <!-- Action Buttons -->
+          <form method="post" class="d-flex gap-2 mt-4">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger flex-fill fw-bold">🗑 Yes, Delete</button>
+            <a href="{% url 'classrooms:class_detail' session.id %}" class="btn btn-secondary flex-fill">⬅ Cancel</a>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
